@@ -7,7 +7,7 @@ import json
 from datetime import datetime
 from json import JSONDecodeError
 from pathlib import Path
-from typing import Any, Mapping, Optional
+from typing import Any, List, Mapping, Optional
 
 import httpx
 
@@ -33,6 +33,10 @@ class AbstractExecutorProxy:
         """Generate tool metadata file for the specified flow."""
         return cls._get_tool_metadata(flow_file, working_dir or flow_file.parent)
 
+    @classmethod
+    def get_used_connection_names(cls, flow_file: Path, working_dir: Optional[Path] = None) -> List[str]:
+        return cls._get_used_connection_names(flow_file, working_dir or flow_file.parent)
+
     def _get_flow_meta(self) -> dict:
         """Get the flow metadata from"""
         raise NotImplementedError()
@@ -54,6 +58,10 @@ class AbstractExecutorProxy:
 
     @classmethod
     def _get_tool_metadata(cls, flow_file: Path, working_dir: Path) -> dict:
+        raise NotImplementedError()
+
+    @classmethod
+    def _get_used_connection_names(cls, flow_file: Path, working_dir: Path) -> List[str]:
         raise NotImplementedError()
 
     @classmethod

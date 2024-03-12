@@ -315,6 +315,7 @@ class ProtectedFlow(Flow, SchemaValidatableMixin):
     # endregion
 
     # region MLFlow model requirements
+    # TODO: avoid touching executable in control plane?
     @property
     def inputs(self):
         # This is used for build mlflow model signature.
