@@ -21,6 +21,7 @@ ERROR_RESPONSE_COMPONENT_NAME = "promptflow"
 EXTENSION_UA = "prompt-flow-extension"
 LANGUAGE_KEY = "language"
 USER_AGENT_OVERRIDE_KEY = "user_agent_override"
+ENABLE_MULTI_CONTAINER_KEY = "EnableMultiContainer"
 
 # Tool meta info
 ICON_DARK = "icon_dark"

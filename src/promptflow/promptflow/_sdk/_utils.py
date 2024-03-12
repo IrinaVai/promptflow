@@ -32,7 +32,13 @@ from keyring.errors import NoKeyringError
 from marshmallow import ValidationError
 
 import promptflow
-from promptflow._constants import EXTENSION_UA, PF_NO_INTERACTIVE_LOGIN, PF_USER_AGENT, USER_AGENT
+from promptflow._constants import (
+    ENABLE_MULTI_CONTAINER_KEY,
+    EXTENSION_UA,
+    PF_NO_INTERACTIVE_LOGIN,
+    PF_USER_AGENT,
+    USER_AGENT,
+)
 from promptflow._sdk._constants import (
     AZURE_WORKSPACE_REGEX_FORMAT,
     DAG_FILE_NAME,
@@ -972,6 +978,10 @@ def is_from_cli():
     from promptflow._cli._user_agent import USER_AGENT as CLI_UA
 
     return CLI_UA in ClientUserAgentUtil.get_user_agent()
+
+
+def is_multi_container_enabled():
+    return os.environ.get(ENABLE_MULTI_CONTAINER_KEY, "false").lower() == "true"
 
 
 def is_url(value: Union[PathLike, str]) -> bool:
