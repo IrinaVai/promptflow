@@ -33,24 +33,20 @@ class AbstractExecutorProxy:
         """Generate tool metadata file for the specified flow."""
         return cls._get_tool_metadata(flow_file, working_dir or flow_file.parent)
 
-    def _get_flow_meta(self) -> dict:
-        """Get the flow metadata from"""
+    @classmethod
+    def generate_metadata(cls, flow_file: Path, working_dir: Path = None):
+        """Generate metadata for the flow and save them to files under .promptflow folder."""
+        cls._generate_metadata(flow_file, working_dir or flow_file.parent)
+
+    @classmethod
+    def _generate_metadata(cls, flow_file: Path, working_dir: Path):
+        """Generate metadata for the flow and save them to files under .promptflow folder.
+        including flow.json and flow.tools.json.
+        """
         raise NotImplementedError()
 
     def get_inputs_definition(self) -> Mapping[str, Any]:
-        """Get the inputs definition of an eager flow"""
-        from promptflow.contracts.flow import FlowInputDefinition
-
-        flow_meta = self._get_flow_meta()
-        inputs = {}
-        for key, value in flow_meta.get("inputs", {}).items():
-            # TODO: update this after we determine whether to accept list here or now
-            _type = value.get("type")
-            if isinstance(_type, list):
-                _type = _type[0]
-            value["type"] = _type
-            inputs[key] = FlowInputDefinition.deserialize(value)
-        return inputs
+        raise NotImplementedError()
 
     @classmethod
     def _get_tool_metadata(cls, flow_file: Path, working_dir: Path) -> dict:
@@ -185,6 +181,21 @@ class APIBasedExecutorProxy(AbstractExecutorProxy):
 
         with open(flow_meta_json_path, mode="r", encoding=DEFAULT_ENCODING) as flow_meta_json_path:
             return json.load(flow_meta_json_path)
+
+    def get_inputs_definition(self):
+        """Get the inputs definition of an eager flow"""
+        from promptflow.contracts.flow import FlowInputDefinition
+
+        flow_meta = self._get_flow_meta()
+        inputs = {}
+        for key, value in flow_meta.get("inputs", {}).items():
+            # TODO: update this after we determine whether to accept list here or now
+            _type = value.get("type")
+            if isinstance(_type, list):
+                _type = _type[0]
+            value["type"] = _type
+            inputs[key] = FlowInputDefinition.deserialize(value)
+        return inputs
 
     @classmethod
     def _get_tool_metadata(cls, flow_file: Path, working_dir: Path) -> dict:

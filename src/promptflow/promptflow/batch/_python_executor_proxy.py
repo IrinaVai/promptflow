@@ -23,6 +23,33 @@ class PythonExecutorProxy(AbstractExecutorProxy):
         self._flow_executor = flow_executor
 
     @classmethod
+    def _generate_metadata(cls, flow_file: Path, working_dir: Path):
+        """Generate metadata for the flow and save them to files under .promptflow folder.
+        including flow.json and flow.tools.json.
+        """
+
+        from promptflow import load_flow
+        from promptflow._sdk._utils import generate_flow_meta, generate_flow_tools_json
+        from promptflow._sdk.entities._eager_flow import EagerFlow
+
+        flow = load_flow(flow_file)
+        if isinstance(flow, EagerFlow):
+            # generate flow.json only for eager flow for now
+            generate_flow_meta(
+                flow_directory=working_dir,
+                source_path=flow.entry_file,
+                entry=flow.entry,
+                dump=True,
+            )
+        else:
+            # generate flow.tools.json for non-eager flow for now
+            generate_flow_tools_json(
+                flow_directory=working_dir,
+                dump=True,
+                used_packages_only=True,
+            )
+
+    @classmethod
     async def create(
         cls,
         flow_file: Path,

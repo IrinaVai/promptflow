@@ -97,6 +97,8 @@ class EagerFlow(FlowBase, SchemaValidatableMixin):
         # when entry file not found in working directory, return None since it can come from package
         return None
 
+    # TODO: no usage? On the other hand, according to our latest design, we'd better avoid touching Executable
+    #  everywhere in devkit.
     def _init_executable(self, **kwargs):
         from promptflow.contracts.flow import EagerFlow as ExecutableEagerFlow
 

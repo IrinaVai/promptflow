@@ -111,7 +111,7 @@ class RunSubmitter:
             # TODO: consider moving this to Operations
             from promptflow.batch import CSharpExecutorProxy
 
-            CSharpExecutorProxy.generate_metadata(flow_file=Path(flow.path), assembly_folder=Path(flow.code))
+            CSharpExecutorProxy.generate_metadata(flow_file=Path(flow.path), working_dir=Path(flow.code))
             # TODO: shall we resolve connections here?
             connections = []
         else:

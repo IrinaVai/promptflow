@@ -46,7 +46,7 @@ class CSharpExecutorProxy(CSharpBaseExecutorProxy):
         return self._chat_output_name
 
     @classmethod
-    def generate_metadata(cls, flow_file: Path, assembly_folder: Path):
+    def _generate_metadata(cls, flow_file: Path, working_dir: Path):
         """Generate metadata for the flow and save them to files under .promptflow folder.
         including flow.json and flow.tools.json.
         """
@@ -62,15 +62,19 @@ class CSharpExecutorProxy(CSharpBaseExecutorProxy):
         try:
             subprocess.check_output(
                 command,
-                cwd=assembly_folder,
+                cwd=working_dir,
             )
         except subprocess.CalledProcessError as e:
             raise UnexpectedError(
-                message_format=f"Failed to generate flow meta for csharp flow.\n"
-                f"Command: {' '.join(command)}\n"
-                f"Working directory: {assembly_folder.as_posix()}\n"
-                f"Return code: {e.returncode}\n"
-                f"Output: {e.output}",
+                message_format="Failed to generate flow meta for csharp flow.\n"
+                "Command: {command}\n"
+                "Working directory: {working_directory}\n"
+                "Return code: {return_code}\n"
+                "Output: {output}",
+                command=" ".join(command),
+                working_directory=working_dir.as_posix(),
+                return_code=e.returncode,
+                output=e.output,
             )
 
     @classmethod
