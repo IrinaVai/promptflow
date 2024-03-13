@@ -36,6 +36,7 @@ from promptflow._sdk._errors import FlowOperationError
 from promptflow._sdk._telemetry import ActivityType, WorkspaceTelemetryMixin, monitor_operation
 from promptflow._sdk._utils import PromptflowIgnoreFile
 from promptflow._sdk._vendor._asset_utils import traverse_directory
+from promptflow._sdk.entities._utils import get_flow_definition
 from promptflow._utils.logger_utils import get_cli_sdk_logger
 from promptflow.azure._constants._flow import DEFAULT_STORAGE
 from promptflow.azure._entities._flow import Flow
@@ -43,6 +44,7 @@ from promptflow.azure._load_functions import load_flow
 from promptflow.azure._restclient.flow_service_caller import FlowServiceCaller
 from promptflow.azure.operations._artifact_utilities import _get_datastore_name, get_datastore_info
 from promptflow.azure.operations._fileshare_storeage_helper import FlowFileStorageClient
+from promptflow.batch._executor_proxy_factory import ExecutorProxyFactory
 from promptflow.exceptions import SystemErrorException, UserErrorException
 
 logger = get_cli_sdk_logger()
@@ -482,7 +484,11 @@ class FlowOperations(WorkspaceTelemetryMixin, _ScopeDependentOperations):
                 return
 
             # generate .promptflow/flow.json for eager flow
-            cls._generate_meta_for_eager_flow(code=code)
+            flow_directory, flow_file = get_flow_definition(code.path)
+            ExecutorProxyFactory().get_executor_proxy_cls(flow.language).generate_flow_metadata(
+                flow_file=flow_directory / flow_file,
+                working_dir=flow_directory,
+            )
 
             if ignore_tools_json:
                 ignore_file = code._ignore_file
@@ -599,18 +605,3 @@ class FlowOperations(WorkspaceTelemetryMixin, _ScopeDependentOperations):
             flow._code_uploaded = True
 
     # endregion
-
-    @classmethod
-    def _generate_meta_for_eager_flow(cls, code):
-        from promptflow import load_flow as load_local_flow
-        from promptflow._sdk.entities._eager_flow import EagerFlow
-
-        flow = load_local_flow(code.path)
-        if isinstance(flow, EagerFlow):
-            from promptflow.batch._executor_proxy_factory import ExecutorProxyFactory
-
-            ExecutorProxyFactory().get_executor_proxy_cls(flow.language).generate_metadata(
-                flow_file=code.path,
-                # TODO: may need to resolve additional includes after supported
-                working_dir=code.path,
-            )

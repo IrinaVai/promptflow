@@ -6,19 +6,14 @@ import abc
 import json
 from os import PathLike
 from pathlib import Path
-from typing import Dict, Optional, Tuple, Union
+from typing import Dict, Optional, Union
 
 from marshmallow import Schema
 
 from promptflow._constants import LANGUAGE_KEY, FlowLanguage
-from promptflow._sdk._constants import (
-    BASE_PATH_CONTEXT_KEY,
-    DAG_FILE_NAME,
-    DEFAULT_ENCODING,
-    FLOW_TOOLS_JSON,
-    PROMPT_FLOW_DIR_NAME,
-)
+from promptflow._sdk._constants import BASE_PATH_CONTEXT_KEY, DEFAULT_ENCODING, FLOW_TOOLS_JSON, PROMPT_FLOW_DIR_NAME
 from promptflow._sdk.entities._connection import _Connection
+from promptflow._sdk.entities._utils import get_flow_definition
 from promptflow._sdk.entities._validation import SchemaValidatableMixin
 from promptflow._utils.flow_utils import resolve_flow_path
 from promptflow._utils.logger_utils import get_cli_sdk_logger
@@ -247,7 +242,7 @@ class ProtectedFlow(Flow, SchemaValidatableMixin):
     ):
         super().__init__(path=path, code=code, dag=dag, **kwargs)
 
-        self._flow_dir, self._dag_file_name = self._get_flow_definition(self.code)
+        self._flow_dir, self._dag_file_name = get_flow_definition(self.code)
         self._executable = None
         self._params_override = params_override
 
@@ -272,20 +267,6 @@ class ProtectedFlow(Flow, SchemaValidatableMixin):
         target_path = self._flow_dir / PROMPT_FLOW_DIR_NAME / FLOW_TOOLS_JSON
         target_path.parent.mkdir(parents=True, exist_ok=True)
         return target_path
-
-    @classmethod
-    def _get_flow_definition(cls, flow, base_path=None) -> Tuple[Path, str]:
-        if base_path:
-            flow_path = Path(base_path) / flow
-        else:
-            flow_path = Path(flow)
-
-        if flow_path.is_dir() and (flow_path / DAG_FILE_NAME).is_file():
-            return flow_path, DAG_FILE_NAME
-        elif flow_path.is_file():
-            return flow_path.parent, flow_path.name
-
-        raise ValueError(f"Can't find flow with path {flow_path.as_posix()}.")
 
     # region SchemaValidatableMixin
     @classmethod

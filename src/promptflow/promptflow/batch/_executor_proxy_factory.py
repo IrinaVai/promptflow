@@ -1,12 +1,15 @@
-from typing import Dict
+from typing import Dict, Type
 
 from promptflow._constants import FlowLanguage
 from promptflow._utils.async_utils import async_run_allowing_running_loop
-from promptflow.batch import AbstractExecutorProxy, CSharpExecutorProxy, PythonExecutorProxy
+
+from ._base_executor_proxy import AbstractExecutorProxy
+from ._csharp_executor_proxy import CSharpExecutorProxy
+from ._python_executor_proxy import PythonExecutorProxy
 
 
 class ExecutorProxyFactory:
-    executor_proxy_classes: Dict[str, AbstractExecutorProxy] = {
+    executor_proxy_classes: Dict[str, Type[AbstractExecutorProxy]] = {
         FlowLanguage.Python: PythonExecutorProxy,
         FlowLanguage.CSharp: CSharpExecutorProxy,
     }
@@ -14,11 +17,11 @@ class ExecutorProxyFactory:
     def __init__(self):
         pass
 
-    def get_executor_proxy_cls(self, language: str) -> AbstractExecutorProxy:
+    def get_executor_proxy_cls(self, language: str) -> Type[AbstractExecutorProxy]:
         return self.executor_proxy_classes[language]
 
     @classmethod
-    def register_executor(cls, language: str, executor_proxy_cls: AbstractExecutorProxy):
+    def register_executor(cls, language: str, executor_proxy_cls: Type[AbstractExecutorProxy]):
         """Register a executor proxy class for a specific program language.
 
         This method allows users to register a executor proxy class for a particular
